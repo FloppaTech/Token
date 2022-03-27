@@ -387,7 +387,7 @@ contract Floppa is Context, IERC20, Ownable {
     IUniswapV2Router02 public router;
     address public pair;
 
-    uint8 private constant _decimals = 9;
+    uint8 private constant _decimals = 18;
     uint256 private constant MAX = ~uint256(0);
 
     uint256 private _tTotal = 1e9 * 10**_decimals;
