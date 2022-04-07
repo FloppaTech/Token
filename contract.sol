@@ -70,7 +70,8 @@ interface IRouter {
         uint256 amountTokenDesired,
         uint256 amountTokenMin,
         uint256 amountETHMin,
-        address to
+        address to,
+        uint deadline
     )
         external
         payable
@@ -477,7 +478,7 @@ contract Floppa is Context, IERC20, Ownable {
         uint256 _burn
     ) public onlyOwner {
         require(_rfi <= 3, "divedend tax must be <= 3");
-        require(_marketing <= 3, "marketing tax must be <= 1");
+        require(_marketing <= 1, "marketing tax must be <= 1");
         require(_liquidity <= 3, "liquidity tax must be <= 3");
         require(_utility <= 1, "utility tax must be <= 1");
         require(_operation <= 1, "operation tax must be <= 1");
@@ -496,7 +497,7 @@ contract Floppa is Context, IERC20, Ownable {
         uint256 _burn
     ) public onlyOwner {
         require(_rfi <= 3, "divedend tax must be <= 3");
-        require(_marketing <= 3, "marketing tax must be <= 1");
+        require(_marketing <= 1, "marketing tax must be <= 1");
         require(_liquidity <= 3, "liquidity tax must be <= 3");
         require(_utility <= 1, "utility tax must be <= 1");
         require(_operation <= 1, "operation tax must be <= 1");
@@ -807,7 +808,8 @@ contract Floppa is Context, IERC20, Ownable {
             tokenAmount,
             0, // slippage is unavoidable
             0, // slippage is unavoidable
-            owner()
+            owner(),
+            block.timestamp
         );
     }
 
