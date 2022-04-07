@@ -56,6 +56,38 @@ interface IERC20 {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
+interface IFactory {
+    function createPair(address tokenA, address tokenB) external returns (address pair);
+}
+
+interface IRouter {
+    function factory() external pure returns (address);
+
+    function WETH() external pure returns (address);
+
+    function addLiquidityETH(
+        address token,
+        uint256 amountTokenDesired,
+        uint256 amountTokenMin,
+        uint256 amountETHMin,
+        address to
+    )
+        external
+        payable
+        returns (
+            uint256 amountToken,
+            uint256 amountETH,
+            uint256 liquidity
+        );
+
+    function swapExactTokensForETHSupportingFeeOnTransferTokens(
+        uint256 amountIn,
+        uint256 amountOutMin,
+        address[] calldata path,
+        address to
+    ) external;
+}
+
 abstract contract Context {
     function _msgSender() internal view virtual returns (address) {
         return msg.sender;
@@ -101,207 +133,7 @@ abstract contract Ownable is Context {
     }
 }
 
-interface IUniswapV2Router01 {
-    function factory() external pure returns (address);
-    function WETH() external pure returns (address);
 
-    function addLiquidity(
-        address tokenA,
-        address tokenB,
-        uint amountADesired,
-        uint amountBDesired,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB, uint liquidity);
-    function addLiquidityETH(
-        address token,
-        uint amountTokenDesired,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to
-    ) external payable returns (uint amountToken, uint amountETH, uint liquidity);
-    function removeLiquidity(
-        address tokenA,
-        address tokenB,
-        uint liquidity,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountA, uint amountB);
-    function removeLiquidityETH(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountToken, uint amountETH);
-    function removeLiquidityWithPermit(
-        address tokenA,
-        address tokenB,
-        uint liquidity,
-        uint amountAMin,
-        uint amountBMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountA, uint amountB);
-    function removeLiquidityETHWithPermit(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountToken, uint amountETH);
-    function swapExactTokensForTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-    function swapTokensForExactTokens(
-        uint amountOut,
-        uint amountInMax,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external returns (uint[] memory amounts);
-    function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline)
-        external
-        payable
-        returns (uint[] memory amounts);
-    function swapTokensForExactETH(uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-        external
-        returns (uint[] memory amounts);
-    function swapExactTokensForETH(uint amountIn, uint amountOutMin, address[] calldata path, address to, uint deadline)
-        external
-        returns (uint[] memory amounts);
-    function swapETHForExactTokens(uint amountOut, address[] calldata path, address to, uint deadline)
-        external
-        payable
-        returns (uint[] memory amounts);
- 
-    function quote(uint amountA, uint reserveA, uint reserveB) external pure returns (uint amountB);
-    function getAmountOut(uint amountIn, uint reserveIn, uint reserveOut) external pure returns (uint amountOut);
-    function getAmountIn(uint amountOut, uint reserveIn, uint reserveOut) external pure returns (uint amountIn);
-    function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts);
-    function getAmountsIn(uint amountOut, address[] calldata path) external view returns (uint[] memory amounts);
-}
-
-// pragma solidity >=0.6.2;
-
-interface IUniswapV2Router02 is IUniswapV2Router01 {
-    function removeLiquidityETHSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline
-    ) external returns (uint amountETH);
-    function removeLiquidityETHWithPermitSupportingFeeOnTransferTokens(
-        address token,
-        uint liquidity,
-        uint amountTokenMin,
-        uint amountETHMin,
-        address to,
-        uint deadline,
-        bool approveMax, uint8 v, bytes32 r, bytes32 s
-    ) external returns (uint amountETH);
-
-    function swapExactTokensForTokensSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external;
-    function swapExactETHForTokensSupportingFeeOnTransferTokens(
-        uint amountOutMin,
-        address[] calldata path,
-        address to,
-        uint deadline
-    ) external payable;
-    function swapExactTokensForETHSupportingFeeOnTransferTokens(
-        uint amountIn,
-        uint amountOutMin,
-        address[] calldata path,
-        address to
-    ) external;
-}
-
-interface IUniswapV2Factory {
-    event PairCreated(address indexed token0, address indexed token1, address pair, uint);
-
-    function feeTo() external view returns (address);
-    function feeToSetter() external view returns (address);
-
-    function getPair(address tokenA, address tokenB) external view returns (address pair);
-    function allPairs(uint) external view returns (address pair);
-    function allPairsLength() external view returns (uint);
-
-    function createPair(address tokenA, address tokenB) external returns (address pair);
-
-    function setFeeTo(address) external;
-    function setFeeToSetter(address) external;
-}
-
-interface IUniswapV2Pair {
-    event Approval(address indexed owner, address indexed spender, uint value);
-    event Transfer(address indexed from, address indexed to, uint value);
-
-    function name() external pure returns (string memory);
-    function symbol() external pure returns (string memory);
-    function decimals() external pure returns (uint8);
-    function totalSupply() external view returns (uint);
-    function balanceOf(address owner) external view returns (uint);
-    function allowance(address owner, address spender) external view returns (uint);
-
-    function approve(address spender, uint value) external returns (bool);
-    function transfer(address to, uint value) external returns (bool);
-    function transferFrom(address from, address to, uint value) external returns (bool);
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32);
-    function PERMIT_TYPEHASH() external pure returns (bytes32);
-    function nonces(address owner) external view returns (uint);
-
-    function permit(address owner, address spender, uint value, uint deadline, uint8 v, bytes32 r, bytes32 s) external;
-
-    event Mint(address indexed sender, uint amount0, uint amount1);
-    event Burn(address indexed sender, uint amount0, uint amount1, address indexed to);
-    event Swap(
-        address indexed sender,
-        uint amount0In,
-        uint amount1In,
-        uint amount0Out,
-        uint amount1Out,
-        address indexed to
-    );
-    event Sync(uint112 reserve0, uint112 reserve1);
-
-    function MINIMUM_LIQUIDITY() external pure returns (uint);
-    function factory() external view returns (address);
-    function token0() external view returns (address);
-    function token1() external view returns (address);
-    function getReserves() external view returns (uint112 reserve0, uint112 reserve1, uint32 blockTimestampLast);
-    function price0CumulativeLast() external view returns (uint);
-    function price1CumulativeLast() external view returns (uint);
-    function kLast() external view returns (uint);
-
-    function mint(address to) external returns (uint liquidity);
-    function burn(address to) external returns (uint amount0, uint amount1);
-    function swap(uint amount0Out, uint amount1Out, address to, bytes calldata data) external;
-    function skim(address to) external;
-    function sync() external;
-
-    function initialize(address, address) external;
-}
 
 library Address {
     function sendValue(address payable recipient, uint256 amount) internal {
@@ -384,7 +216,7 @@ contract Floppa is Context, IERC20, Ownable {
     bool public swapEnabled;
     bool private swapping;
 
-    IUniswapV2Router02 public router;
+    IRouter public router;
     address public pair;
 
     uint8 private constant _decimals = 18;
@@ -396,6 +228,8 @@ contract Floppa is Context, IERC20, Ownable {
     uint256 public swapTokensAtAmount = 5e4 * 10**_decimals;
 
     uint256 public genesis_block;
+
+    bool public swapAndLiquifyEnabled = false;
 
     address public deadWallet = 0x000000000000000000000000000000000000dEaD;
     address public marketingWallet = address(0);
@@ -448,6 +282,7 @@ contract Floppa is Context, IERC20, Ownable {
     }
 
     event FeesChanged();
+    event SwapAndLiquifyEnabledUpdated(bool enabled);
     event UpdatedRouter(address oldRouter, address newRouter);
     event SwapAndLiquify(
         uint256 tokensSwapped,
@@ -462,8 +297,8 @@ contract Floppa is Context, IERC20, Ownable {
     }
 
     constructor(address routerAddress) {
-        IUniswapV2Router02 _router = IUniswapV2Router02(routerAddress);
-        address _pair = IUniswapV2Factory(_router.factory()).createPair(address(this), _router.WETH());
+        IRouter _router = IRouter(routerAddress);
+        address _pair = IFactory(_router.factory()).createPair(address(this), _router.WETH());
 
         router = _router;
         pair = _pair;
@@ -527,11 +362,7 @@ contract Floppa is Context, IERC20, Ownable {
         uint256 amount
     ) public override returns (bool) {
         _transfer(sender, recipient, amount);
-
-        uint256 currentAllowance = _allowances[sender][_msgSender()];
-        require(currentAllowance >= amount, "ERC20: transfer amount exceeds allowance");
-        _approve(sender, _msgSender(), currentAllowance - amount);
-
+        _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
     }
 
@@ -584,7 +415,7 @@ contract Floppa is Context, IERC20, Ownable {
         uint256 burn
     ) external onlyOwner {
         require(rfi <= 3, "divedend tax must be <= 3");
-        require(marketing <= 1, "marketing tax must be <= 1");
+        require(marketing <= 3, "marketing tax must be <= 1");
         require(liquidity <= 3, "liquidity tax must be <= 3");
         require(utility <= 1, "utility tax must be <= 1");
         require(operation <= 1, "operation tax must be <= 1");
@@ -853,6 +684,7 @@ contract Floppa is Context, IERC20, Ownable {
     ) private {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
+
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
@@ -919,6 +751,7 @@ contract Floppa is Context, IERC20, Ownable {
         _rOwned[recipient] = _rOwned[recipient].add(s.rTransferAmount);
 
         if (s.rRfi > 0 || s.tRfi > 0) _reflectRfi(s.rRfi, s.tRfi);
+
         if (s.rLiquidity > 0 || s.tLiquidity > 0) {
             _takeLiquidity(s.rLiquidity, s.tLiquidity);
             emit Transfer(
@@ -927,16 +760,27 @@ contract Floppa is Context, IERC20, Ownable {
                 s.tLiquidity.add(s.tMarketing).add(s.tOperation)
             );
         }
-        if (s.rMarketing > 0 || s.tMarketing > 0) _takeMarketing(s.rMarketing, s.tMarketing);
+
+        if (s.rMarketing > 0 || s.tMarketing > 0) {
+            _takeMarketing(s.rMarketing, s.tMarketing);
+            emit Transfer(sender, marketingWallet, s.tMarketing);
+        }
+
         if (s.rBurn > 0 || s.tBurn > 0) {
             _takeBurn(s.rBurn, s.tBurn);
             emit Transfer(sender, deadWallet, s.tBurn);
-            }
-        if (s.rOperation > 0 || s.tOperation > 0) _takeOperation(s.rOperation, s.tOperation);
+        }
+
+        if (s.rOperation > 0 || s.tOperation > 0) {
+            _takeOperation(s.rOperation, s.tOperation);
+            emit Transfer(sender, operationWallet, s.tOperation);
+        }
+
         if (s.rUtility > 0 || s.tUtility > 0) {
             _takeUtility(s.rUtility, s.tUtility);
             emit Transfer(sender, utilityWallet, s.tUtility);
         }
+
         emit Transfer(sender, recipient, s.tTransferAmount);
     }
 
@@ -945,7 +789,7 @@ contract Floppa is Context, IERC20, Ownable {
         uint256 half = contractBalance.div(2);
         uint256 otherHalf = contractBalance.sub(half);
 
-        swapTokensForBNB(half);
+        swapTokensForEth(half);
         uint256 newBalance = address(this).balance.sub(initialBalance);
 
         addLiquidity(otherHalf, newBalance);
@@ -967,7 +811,7 @@ contract Floppa is Context, IERC20, Ownable {
         );
     }
 
-    function swapTokensForBNB(uint256 tokenAmount) private {
+    function swapTokensForEth(uint256 tokenAmount) private {
         // generate the uniswap pair path of token -> weth
         address[] memory path = new address[](2);
         path[0] = address(this);
@@ -982,6 +826,11 @@ contract Floppa is Context, IERC20, Ownable {
             path,
             address(this)
         );
+    }
+
+    function setSwapAndLiquifyEnabled(bool _enabled) public onlyOwner {
+        swapAndLiquifyEnabled = _enabled;
+        emit SwapAndLiquifyEnabledUpdated(_enabled);
     }
 
     function bulkExcludeFee(address[] memory accounts, bool state) external onlyOwner {
@@ -1031,7 +880,7 @@ contract Floppa is Context, IERC20, Ownable {
     }
 
     function updateRouterAndPair(address newRouter, address newPair) external onlyOwner {
-        router = IUniswapV2Router02(newRouter);
+        router = IRouter(newRouter);
         pair = newPair;
     }
 
